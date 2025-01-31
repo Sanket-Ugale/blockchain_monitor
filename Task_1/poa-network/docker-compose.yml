@@ -1,0 +1,132 @@
+version: '3'
+
+services:
+  node1:
+    image: ethereum/client-go:latest
+    command:
+      - "--http"
+      - "--http.addr=0.0.0.0"
+      - "--http.api=eth,net,web3,personal,clique,admin,debug,txpool"
+      - "--http.corsdomain=*"
+      - "--http.vhosts=*"
+      - "--authrpc.vhosts=*"
+      - "--ws"
+      - "--ws.addr=0.0.0.0"
+      - "--ws.api=eth,net,web3,personal,clique,admin,debug,txpool"
+      - "--ws.origins=*"
+      - "--networkid=12345"
+      - "--syncmode=full"
+      - "--mine"
+      - "--unlock=0"
+      - "--password=/data/password.txt"
+      - "--allow-insecure-unlock"
+      - "--nodiscover"
+      - "--metrics"
+      - "--metrics.addr=0.0.0.0"
+      - "--metrics.port=6060"
+      - "--rpc.enabledeprecatedpersonal"  # Critical addition
+    environment:
+      - GETH_OPTS=--rpc.allow-unprotected-txs
+    volumes:
+      - ./node1/data:/data
+    ports:
+      - "6060:6060"  # Metrics port
+      - "8545:8545"  # JSON-RPC port
+      - "30303:30303"  # P2P port
+    networks:
+      - poa-net
+
+  node2:
+    image: ethereum/client-go:latest
+    command:
+      - "--http"
+      - "--http.addr=0.0.0.0"
+      - "--http.api=eth,net,web3,personal,clique,admin,debug,txpool"
+      - "--http.corsdomain=*"
+      - "--http.vhosts=*"
+      - "--authrpc.vhosts=*"
+      - "--ws"
+      - "--ws.addr=0.0.0.0"
+      - "--ws.api=eth,net,web3,personal,clique,admin,debug,txpool"
+      - "--ws.origins=*"
+      - "--networkid=12345"
+      - "--syncmode=full"
+      - "--mine"
+      - "--unlock=0"
+      - "--password=/data/password.txt"
+      - "--allow-insecure-unlock"
+      - "--nodiscover"
+      - "--metrics"
+      - "--metrics.addr=0.0.0.0"
+      - "--metrics.port=6060"
+      - "--rpc.enabledeprecatedpersonal"  # Critical addition
+    environment:
+      - GETH_OPTS=--rpc.allow-unprotected-txs
+    volumes:
+      - ./node2/data:/data
+    ports:
+      - "6061:6060"  # Metrics port
+      - "8546:8545"  # JSON-RPC port
+      - "30304:30303"  # P2P port
+    networks:
+      - poa-net
+
+  node3:
+    image: ethereum/client-go:latest
+    command:
+      - "--http"
+      - "--http.addr=0.0.0.0"
+      - "--http.api=eth,net,web3,personal,clique,admin,debug,txpool"
+      - "--http.corsdomain=*"
+      - "--http.vhosts=*"
+      - "--authrpc.vhosts=*"
+      - "--ws"
+      - "--ws.addr=0.0.0.0"
+      - "--ws.api=eth,net,web3,personal,clique,admin,debug,txpool"
+      - "--ws.origins=*"
+      - "--networkid=12345"
+      - "--syncmode=full"
+      - "--mine"
+      - "--unlock=0"
+      - "--password=/data/password.txt"
+      - "--allow-insecure-unlock"
+      - "--nodiscover"
+      - "--metrics"
+      - "--metrics.addr=0.0.0.0"
+      - "--metrics.port=6060"
+      - "--rpc.enabledeprecatedpersonal"  # Critical addition
+    environment:
+      - GETH_OPTS=--rpc.allow-unprotected-txs
+    volumes:
+      - ./node3/data:/data
+    ports:
+      - "6062:6060"  # Metrics port
+      - "8547:8545"  # JSON-RPC port
+      - "30305:30303"  # P2P port
+    networks:
+      - poa-net
+
+  prometheus:
+    image: prom/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - poa-net
+
+  grafana:
+    image: grafana/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    networks:
+      - poa-net
+
+networks:
+  poa-net:

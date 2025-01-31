@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/code
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+
+  redis:
+    image: redis:6
+
+  celery:
+    build: .
+    command: celery -A config worker --loglevel=info
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A config beat --loglevel=info
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
